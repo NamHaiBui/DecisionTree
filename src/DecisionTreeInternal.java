@@ -152,7 +152,19 @@ public class DecisionTreeInternal extends DecisionTree {
 	private double expectedEntropy(Attribute attribute, InstanceSet examples) throws DecisionTreeException {
 		// TODO: fill in the body of this method and fix the return statement
 		// HINT: use the Distribution class
-		return 0.0;
+		
+		// expected entropy is the sum of all the attributes in the instance
+
+		Distribution distributionOfAtt = new Distribution(attribute);
+		ArrayList<Instance> instanceList = examples.getInstances();
+		int indexOfAttributeInInstanceSet = examples.getAttributeSet().getAttributeIndex(attribute);
+		// calculate weights
+		for(int i = 0; i < instanceList.size(); i++) {
+			distributionOfAtt.incrementFrequency(instanceList.get(i).getValues()[indexOfAttributeInInstanceSet]);
+		}
+		distributionOfAtt.computeProbabilitiesFromFrequencies();
+		
+		return distributionOfAtt.getEntropy();
 	}
 
 	/* (non-Javadoc)
