@@ -36,7 +36,14 @@ public class DecisionTreeLeaf extends DecisionTree {
 	private String computeDecision(InstanceSet examples) {
 		// TODO: fill in the body of this method and fix the return statement
 		// HINT: use the Distribution class
-		return null;
+		String d = "";
+		if(examples.getAttributeSet().getAttributes().size() == 0) {//empty attributes
+			//?
+		}
+		else {//isPure
+			d = examples.getInstances().get(0).getValues()[examples.getAttributeSet().getClassAttributeIndex()];
+		}
+		return d;
 	}
 
 	/*
