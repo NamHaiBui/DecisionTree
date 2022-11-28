@@ -75,7 +75,18 @@ public class DecisionTreeInternal extends DecisionTree {
 			ArrayList<Attribute> attributes) throws DecisionTreeException {
 		// TODO: fill in the body of this method and fix the return statement
 		// HINT: the expectedEntropy() method will be needed
-		return null;
+		// select the attribute with the lowest expected entropy
+		double lowestEE = Double.MAX_VALUE;
+		Attribute attributeWithLowestEE = null;
+		for(int i = 0; i < attributes.size(); i++)	{
+			Attribute currAttribute = attributes.get(i);
+			double currAttributeEE = expectedEntropy(attributes.get(i),examples);
+			if( currAttributeEE <= lowestEE) {
+				lowestEE = currAttributeEE;
+				attributeWithLowestEE = currAttribute;
+			}
+		}
+		return attributeWithLowestEE;
 	}
 
 	/**
