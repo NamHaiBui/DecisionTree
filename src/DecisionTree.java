@@ -70,9 +70,9 @@ public abstract class DecisionTree {
 	// Return true if the given set of instances is pure, and false otherwise.
 	private static boolean isPure(InstanceSet instances) {
 		// if all classification attributes have the same value then the tree is pure
-
 		ArrayList<Instance> instancesList = instances.getInstances();
-		String classification = instancesList.get(0).getValues()[instancesList.get(0).getValues().length];
+		int classificationAttIndex = instances.getAttributeSet().getAttributeIndex(instances.getAttributeSet().getClassAttribute());
+		String classification = instancesList.get(0).getValues()[classificationAttIndex];
 		for(int i = 0; i < instancesList.size(); i++) {
 			String[] instanceAti = instancesList.get(i).getValues();
 			if(!instanceAti[instanceAti.length].equals(classification)) {

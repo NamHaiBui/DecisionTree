@@ -162,6 +162,7 @@ public class DecisionTreeInternal extends DecisionTree {
 		for(int i = 0; i < instanceList.size(); i++) {
 			distributionOfAtt.incrementFrequency(instanceList.get(i).getValues()[indexOfAttributeInInstanceSet]);
 		}
+		
 		distributionOfAtt.computeProbabilitiesFromFrequencies();
 		
 		return distributionOfAtt.getEntropy();
