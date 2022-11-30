@@ -57,27 +57,29 @@ public abstract class DecisionTree {
 			String label, int depth) throws DecisionTreeException {
 		// The algorithm closely mimics figure 18.5 of Russell and Norvig.
 		if (examples.getNumInstances() == 0) {
-			return new DecisionTreeInternal(parentExamples,attributes,
-					label, depth);
+			// return Plurality-Value when no examples
+			return new DecisionTreeLeaf(parentExamples, label, depth);
 		} else if (isPure(examples) || attributes.size() == 0) {
+			// return Plurality-Value when attributes is empty or have the same classification
 			return new DecisionTreeLeaf(examples, label, depth);
 		} else {
-			return new DecisionTreeInternal(examples, attributes,
-					label, depth);
+			//recursive call
+			return new DecisionTreeInternal(examples, attributes, label, depth);
 		}
 	}
 
 	// Return true if the given set of instances is pure, and false otherwise.
 	private static boolean isPure(InstanceSet instances) {
+
 		// if all classification attributes have the same value then the tree is pure
+		int classificationAttIndex = instances.getAttributeSet().getClassAttributeIndex();
 		ArrayList<Instance> instancesList = instances.getInstances();
-		int classificationAttIndex = instances.getAttributeSet().getAttributeIndex(instances.getAttributeSet().getClassAttribute());
+		
 		String classification = instancesList.get(0).getValues()[classificationAttIndex];
+
 		for(int i = 0; i < instancesList.size(); i++) {
-			String[] instanceAti = instancesList.get(i).getValues();
-			if(!instanceAti[instanceAti.length].equals(classification)) {
-				return false;
-			}
+			String instanceAti = instancesList.get(i).getValues()[classificationAttIndex];
+			if(!instanceAti.equals(classification)) return false;
 		}
 		return true;
 	}

@@ -1,3 +1,5 @@
+import java.util.ArrayList;
+
 /**
  * Represents a leaf in a decision tree.
  * 
@@ -34,16 +36,20 @@ public class DecisionTreeLeaf extends DecisionTree {
 	 *         examples.
 	 */
 	private String computeDecision(InstanceSet examples) {
-		// TODO: fill in the body of this method and fix the return statement
+		// fill in the body of this method and fix the return statement
 		// HINT: use the Distribution class
-		String d = "";
-		if(examples.getAttributeSet().getAttributes().size() == 0) {//empty attributes
-			//?
+		AttributeSet attributes = examples.getAttributeSet();
+		Attribute classAttr = attributes.getClassAttribute();
+		Distribution distr = new Distribution(classAttr);
+
+		// get the value with the highest frequency through Decision
+		int classAttrIndex = attributes.getClassAttributeIndex();
+		ArrayList<Instance>instances = examples.getInstances();
+
+		for (int i = 0; i < instances.size(); i++) {
+			distr.incrementFrequency(instances.get(i).getValues()[classAttrIndex]);
 		}
-		else {//isPure
-			d = examples.getInstances().get(0).getValues()[examples.getAttributeSet().getClassAttributeIndex()];
-		}
-		return d;
+		return distr.getNameOfMaxFrequency();
 	}
 
 	/*

@@ -73,20 +73,25 @@ public class DecisionTreeInternal extends DecisionTree {
 	 */
 	private Attribute getSplitAttribute(InstanceSet examples,
 			ArrayList<Attribute> attributes) throws DecisionTreeException {
-		// TODO: fill in the body of this method and fix the return statement
+		// fill in the body of this method and fix the return statement
 		// HINT: the expectedEntropy() method will be needed
+
 		// select the attribute with the lowest expected entropy
-		double lowestEE = Double.MAX_VALUE;
-		Attribute attributeWithLowestEE = null;
-		for(int i = 0; i < attributes.size(); i++)	{
-			Attribute currAttribute = attributes.get(i);
-			double currAttributeEE = expectedEntropy(attributes.get(i),examples);
-			if( currAttributeEE <= lowestEE) {
-				lowestEE = currAttributeEE;
-				attributeWithLowestEE = currAttribute;
+		Attribute minEntropyAttr = attributes.get(0);
+		Double minEntropy = expectedEntropy(minEntropyAttr, examples);
+
+		for (int i = 0; i < attributes.size(); i++) {
+			Attribute curAttr = attributes.get(i);
+			Double curEntropy = expectedEntropy(curAttr, examples);
+
+			//update if the current attribute minimizes the entropy
+			if (curEntropy < minEntropy) {
+				minEntropy = curEntropy;
+				minEntropyAttr = curAttr;
 			}
 		}
-		return attributeWithLowestEE;
+
+		return minEntropyAttr;
 	}
 
 	/**
@@ -142,9 +147,16 @@ public class DecisionTreeInternal extends DecisionTree {
 	 */
 	private HashMap<String, DecisionTree> makeChildren(InstanceSet examples,
 			ArrayList<Attribute> attributes) throws DecisionTreeException {
-		// TODO: fill in the body of this method and fix the return statement
-		// HINT: the getMatches() method will be useful
-		return null;
+		HashMap<String, DecisionTree> children = new HashMap<>();
+		String[] curAttrValues = splitAttribute.getValues();
+
+		for (int i = 0; i < curAttrValues.length; i++) {
+			// every match becomes a child of the current node
+			InstanceSet matches = getMatches(splitAttribute, curAttrValues[i], examples);
+			children.put(curAttrValues[i], DecisionTree.constructDecisionTree(matches, attributes, examples, curAttrValues[i], depth + 1));
+		}
+
+		return children;
 	}
 
 
@@ -161,22 +173,47 @@ public class DecisionTreeInternal extends DecisionTree {
 	 * @throws DecisionTreeException 
 	 */
 	private double expectedEntropy(Attribute attribute, InstanceSet examples) throws DecisionTreeException {
-		// TODO: fill in the body of this method and fix the return statement
-		// HINT: use the Distribution class
-		
-		// expected entropy is the sum of all the attributes in the instance
 
-		Distribution distributionOfAtt = new Distribution(attribute);
-		ArrayList<Instance> instanceList = examples.getInstances();
-		int indexOfAttributeInInstanceSet = examples.getAttributeSet().getAttributeIndex(attribute);
-		// calculate weights
-		for(int i = 0; i < instanceList.size(); i++) {
-			distributionOfAtt.incrementFrequency(instanceList.get(i).getValues()[indexOfAttributeInInstanceSet]);
+		AttributeSet attributes = examples.getAttributeSet();
+		int classAttrIndex = attributes.getAttributeIndex(attribute);
+
+		// the distribution of the whole set
+		Distribution distr = new Distribution(attribute);
+		ArrayList<Instance>instances = examples.getInstances();
+
+		for (int i = 0; i < instances.size(); i++) {
+			distr.incrementFrequency(instances.get(i).getValues()[classAttrIndex]);
 		}
-		
-		distributionOfAtt.computeProbabilitiesFromFrequencies();
-		
-		return distributionOfAtt.getEntropy();
+
+		//validate the probabilities
+		distr.computeProbabilitiesFromFrequencies();
+		//total frequencies for p + n as in the book
+		double totalFrequencies = (double) distr.getTotalFrequencies();
+
+		//remainder(A) as in the book
+		double remainder = 0;
+
+		String [] attrValues = attribute.getValues();
+
+		//calculate the subset of instances for every attribute value
+		//and their corresponding entropy
+		for (int i = 0; i < attrValues.length; i++) {
+
+			InstanceSet subsets = getMatches(attribute, attrValues[i], examples);
+			ArrayList<Instance>subsetsList = subsets.getInstances();
+
+			Distribution curDistr = new Distribution(attribute);
+			for (int j = 0; j < subsetsList.size(); j++) {
+						curDistr.incrementFrequency(subsetsList.get(j).getValues()[classAttrIndex]);
+			}
+
+			curDistr.computeProbabilitiesFromFrequencies();
+			double curTotalFreq = (double)curDistr.getTotalFrequencies();
+
+			remainder = remainder + (curTotalFreq/totalFrequencies) * curDistr.getEntropy();
+
+		}
+		return remainder;
 	}
 
 	/* (non-Javadoc)
@@ -184,9 +221,9 @@ public class DecisionTreeInternal extends DecisionTree {
 	 */
 	@Override
 	public String decide(AttributeSet attributes, Instance instance) {
-		// TODO: fill in the body of this method and fix the return statement
-		// HINT: use the Distribution class
-		return null;
+		int index = attributes.getAttributeIndex(splitAttribute);
+		String value = instance.getValues()[index];
+		return children.get(value).decide(attributes, instance);
 	}
 
 	/* (non-Javadoc)
